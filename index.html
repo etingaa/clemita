@@ -2,248 +2,29 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Question très sérieuse</title>
-  <style>
-    :root {
-      --bg1: #0b1020;
-      --bg2: #120a2a;
-      --card: rgba(255,255,255,0.08);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.65);
-      --yes: #22c55e;
-      --no: #ef4444;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color: var(--text);
-      background: radial-gradient(1200px 700px at 20% 10%, #2a1b5a 0%, transparent 60%),
-                  radial-gradient(900px 600px at 80% 30%, #1a6a6a 0%, transparent 55%),
-                  linear-gradient(160deg, var(--bg1), var(--bg2));
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-    }
-
-    .wrap {
-      width: min(900px, 92vw);
-      padding: 28px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 22px;
-      padding: clamp(22px, 4vw, 40px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-      position: relative;
-    }
-
-    h1 {
-      margin: 0 0 10px 0;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      font-size: clamp(26px, 4vw, 44px);
-      text-align: center;
-    }
-
-    p {
-      margin: 0 0 26px 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: clamp(14px, 2vw, 16px);
-    }
-
-    .arena {
-      position: relative;
-      width: 100%;
-      height: clamp(220px, 30vh, 300px);
-      border-radius: 18px;
-      background: rgba(0,0,0,0.18);
-      border: 1px dashed rgba(255,255,255,0.18);
-      overflow: hidden;
-    }
-
-    .buttons {
-      position: absolute;
-      inset: 0;
-    }
-
-    .btn {
-      position: absolute;
-      padding: 14px 18px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.10);
-      color: var(--text);
-      font-weight: 700;
-      cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      min-width: 110px;
-    }
-
-    .btn:hover { transform: translateY(-2px); }
-    .btn:active { transform: translateY(0px) scale(0.98); }
-
-    #yesBtn {
-      left: 22%;
-      top: 55%;
-      background: color-mix(in srgb, var(--yes) 28%, rgba(255,255,255,0.10));
-      border-color: color-mix(in srgb, var(--yes) 40%, rgba(255,255,255,0.18));
-    }
-
-    #noBtn {
-      left: 62%;
-      top: 55%;
-      background: color-mix(in srgb, var(--no) 18%, rgba(255,255,255,0.10));
-      border-color: color-mix(in srgb, var(--no) 35%, rgba(255,255,255,0.18));
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.16);
-      padding: 12px 14px;
-      border-radius: 14px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 160ms ease, transform 160ms ease;
-      font-weight: 650;
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(-4px);
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
+  <main class="wrap">
+    <section class="card">
       <h1>est-ce que tu es l'amour de la vie d'Etienne ?</h1>
-      <p>(Choisis avec sagesse… le “Non” est un peu timide.)</p>
+      <p>(Sur téléphone : essaie d’attraper “Non” 😄)</p>
 
-      <div class="arena" id="arena">
-        <div class="buttons">
-          <button class="btn" id="yesBtn">Oui</button>
-          <button class="btn" id="noBtn" aria-label="Non (impossible à attraper)">Non</button>
-        </div>
+      <div class="arena" id="arena" aria-label="Zone de choix">
+        <button class="btn btn-yes" id="yesBtn">Oui</button>
+        <button class="btn btn-no" id="noBtn" disabled aria-disabled="true">Non</button>
       </div>
-    </div>
-  </div>
 
-  <div class="toast" id="toast"></div>
+      <div class="result" id="result">BRAVO VOUS ÊTES MARIÉE</div>
+      <div class="hint">Le bouton “Non” n’est pas cliquable et fuit ton doigt.</div>
+    </section>
+  </main>
 
-  <script>
-    const arena = document.getElementById("arena");
-    const noBtn  = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
-    const toast  = document.getElementById("toast");
+  <!-- Canvas confettis -->
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
-    // Empêche le clic "Non" (même si quelqu'un arrive à le toucher via clavier)
-    noBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      showToast("Bien essayé 😄");
-    });
-
-    // Positionne "Non" aléatoirement dans l'arène, sans sortir.
-    function moveNoButtonAway(fromX, fromY) {
-      const aRect = arena.getBoundingClientRect();
-      const bRect = noBtn.getBoundingClientRect();
-
-      const padding = 12;
-      const maxX = aRect.width  - bRect.width  - padding;
-      const maxY = aRect.height - bRect.height - padding;
-
-      // Génère plusieurs candidats et prend celui qui s'éloigne le plus du pointeur
-      let best = null;
-      for (let i = 0; i < 10; i++) {
-        const x = padding + Math.random() * Math.max(0, maxX - padding);
-        const y = padding + Math.random() * Math.max(0, maxY - padding);
-
-        const cx = aRect.left + x + bRect.width / 2;
-        const cy = aRect.top  + y + bRect.height / 2;
-
-        const dx = cx - fromX;
-        const dy = cy - fromY;
-        const dist2 = dx*dx + dy*dy;
-
-        if (!best || dist2 > best.dist2) best = { x, y, dist2 };
-      }
-
-      noBtn.style.left = best.x + "px";
-      noBtn.style.top  = best.y + "px";
-      noBtn.style.transform = "translateZ(0)"; // petite perf
-    }
-
-    // Déclenche la fuite quand on s'approche
-    function handlePointerMove(clientX, clientY) {
-      const b = noBtn.getBoundingClientRect();
-      const centerX = b.left + b.width / 2;
-      const centerY = b.top  + b.height / 2;
-
-      const dx = clientX - centerX;
-      const dy = clientY - centerY;
-      const distance = Math.hypot(dx, dy);
-
-      // Distance de "panique" (ajuste si tu veux)
-      const panicRadius = 110;
-
-      if (distance < panicRadius) {
-        moveNoButtonAway(clientX, clientY);
-      }
-    }
-
-    // Souris + tactile
-    window.addEventListener("mousemove", (e) => handlePointerMove(e.clientX, e.clientY), { passive: true });
-    window.addEventListener("touchmove", (e) => {
-      if (e.touches && e.touches[0]) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-
-    // Si l'arène change de taille, on garde le bouton "Non" dans les limites
-    window.addEventListener("resize", () => {
-      const aRect = arena.getBoundingClientRect();
-      const bRect = noBtn.getBoundingClientRect();
-      const left = parseFloat(noBtn.style.left || "0");
-      const top  = parseFloat(noBtn.style.top  || "0");
-
-      const padding = 12;
-      const maxLeft = aRect.width  - bRect.width  - padding;
-      const maxTop  = aRect.height - bRect.height - padding;
-
-      noBtn.style.left = Math.min(Math.max(left, padding), Math.max(padding, maxLeft)) + "px";
-      noBtn.style.top  = Math.min(Math.max(top,  padding), Math.max(padding, maxTop)) + "px";
-    });
-
-    // "Oui" affiche un petit message
-    yesBtn.addEventListener("click", () => {
-      showToast("💖 Réponse enregistrée : OUI !");
-    });
-
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add("show");
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.classList.remove("show"), 1600);
-    }
-
-    // Optionnel: déplace une première fois pour que "Non" soit déjà un peu vivant
-    // (sans pointer, on prend le centre de l'écran)
-    const initX = window.innerWidth / 2;
-    const initY = window.innerHeight / 2;
-    moveNoButtonAway(initX, initY);
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
